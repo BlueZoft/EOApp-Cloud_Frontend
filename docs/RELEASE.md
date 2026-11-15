@@ -63,3 +63,7 @@ Local evidence: Android debug APK packaging passed; the missing-signing release 
 ## Staff portal in 1.2
 
 Configure same-origin/same-site HTTPS hosting for the browser-managed staff cookie and enable/provision the backend explicitly. Staff sign-in is web-only; do not put an officer password in native/web build configuration. See [staff portal guide](STAFF.md).
+
+## Customer discovery/languages in 1.3
+
+No new API setting, credential or data migration is required. Review the new Sinhala/English/Tamil interface text with fluent speakers, check mixed-script font rendering and confirm search/comparison on the target devices. Original Sinhala scheme/branch descriptions remain unchanged; approved translations and verified eligibility metadata are still required for those future extensions. See [discovery guide](DISCOVERY.md).

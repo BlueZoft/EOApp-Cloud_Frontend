@@ -1,23 +1,53 @@
 import 'package:flutter/material.dart';
 import 'data/catalogue_repository.dart';
 import 'models/catalogue.dart';
-import 'l10n/si.dart';
+import 'l10n/app_strings.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'category_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'staff/staff_portal_screen.dart';
 
 void main() => runApp(const OutreachApp());
 
-class OutreachApp extends StatelessWidget {
-  const OutreachApp({super.key});
+class OutreachApp extends StatefulWidget {
+  final Locale initialLocale;
+  const OutreachApp({super.key, this.initialLocale = const Locale('si')});
   @override
-  Widget build(BuildContext context) => MaterialApp(
-      title: 'Hetarata',
-      theme: ThemeData(
-          fontFamily: 'NotoSansSinhala',
-          colorSchemeSeed: Colors.cyan,
-          useMaterial3: true),
-      home: const WelcomeScreen());
+  State<OutreachApp> createState() => _OutreachAppState();
+}
+
+class _OutreachAppState extends State<OutreachApp> {
+  late Locale _locale = widget.initialLocale;
+  @override
+  Widget build(BuildContext context) => LanguageScope(
+      locale: _locale,
+      change: (locale) => setState(() {
+            _locale = locale;
+          }),
+      child: MaterialApp(
+          title: 'Hetarata',
+          locale: _locale,
+          supportedLocales: const [Locale('si'), Locale('en'), Locale('ta')],
+          localizationsDelegates: const [
+            AppStrings.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate
+          ],
+          theme: ThemeData(
+              fontFamily: _locale.languageCode == 'ta'
+                  ? 'NotoSansTamil'
+                  : _locale.languageCode == 'en'
+                      ? 'Roboto'
+                      : 'NotoSansSinhala',
+              fontFamilyFallback: const [
+                'NotoSansSinhala',
+                'NotoSansTamil',
+                'Roboto'
+              ],
+              colorSchemeSeed: Colors.cyan,
+              useMaterial3: true),
+          home: const WelcomeScreen()));
 }
 
 class WelcomeScreen extends StatefulWidget {
@@ -30,7 +60,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   late Future<Catalogue> _catalogue = loadCatalogue();
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(title: const Text(Si.title), actions: [
+      appBar: AppBar(title: Text(AppStrings.of(context).t('title')), actions: [
+        const LanguagePicker(),
         if (kIsWeb)
           IconButton(
               tooltip: 'Officer inbox',
@@ -54,14 +85,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           onPressed: () => setState(() {
                                 _catalogue = loadCatalogue();
                               }),
-                          child: const Text('නැවත උත්සාහ කරන්න'));
+                          child: Text(AppStrings.of(context).t('retry')));
                     }
                     if (!snapshot.hasData) {
                       return const CircularProgressIndicator();
                     }
                     return ElevatedButton.icon(
                         icon: const Icon(Icons.arrow_forward),
-                        label: const Text('ආරම්භ කරන්න'),
+                        label: Text(AppStrings.of(context).t('start')),
                         onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute<void>(

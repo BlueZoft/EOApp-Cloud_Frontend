@@ -4,7 +4,7 @@ import 'models/inquiry.dart';
 import 'services/inquiry_api.dart';
 import 'services/validators.dart';
 import 'widgets/app_page.dart';
-import 'l10n/si.dart';
+import 'l10n/app_strings.dart';
 
 class InquiryFormScreen extends StatefulWidget {
   final LoanProduct? loan;
@@ -34,7 +34,7 @@ class _InquiryFormScreenState extends State<InquiryFormScreen> {
   String? _sex;
   Branch? _branch;
   bool _consent = false, _submitting = false;
-  String? _error;
+  String? _errorKey;
   Map<String, String> _serverFields = {};
   String? _key;
   InquiryRequest? _pending;
@@ -54,13 +54,13 @@ class _InquiryFormScreenState extends State<InquiryFormScreen> {
     if (_submitting || _receipt != null) return;
     setState(() {
       _serverFields = {};
-      _error = null;
+      _errorKey = null;
     });
     if (_pending == null) {
       if (!_form.currentState!.validate() || !_consent) {
         if (!_consent) {
           setState(() {
-            _error = Si.consent;
+            _errorKey = 'consent';
           });
         }
         return;
@@ -91,9 +91,7 @@ class _InquiryFormScreenState extends State<InquiryFormScreen> {
       if (!mounted) return;
       setState(() {
         _serverFields = error.fields;
-        _error = error.code == 'RATE_LIMITED'
-            ? 'මඳ වේලාවකින් නැවත උත්සාහ කරන්න.'
-            : Si.failed;
+        _errorKey = error.code == 'RATE_LIMITED' ? 'wait' : 'failed';
         // A validation rejection cannot have persisted; allow correction.
         // Ambiguous failures retain exactly the same payload and key for retry.
         if (error.code == 'VALIDATION_ERROR') {
@@ -104,7 +102,7 @@ class _InquiryFormScreenState extends State<InquiryFormScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _error = Si.failed;
+        _errorKey = 'failed';
       });
     } finally {
       if (mounted) {
@@ -126,8 +124,9 @@ class _InquiryFormScreenState extends State<InquiryFormScreen> {
               decoration: InputDecoration(
                   labelText: label,
                   border: const OutlineInputBorder(),
-                  errorText:
-                      _serverFields.containsKey(key) ? Si.invalid : null),
+                  errorText: _serverFields.containsKey(key)
+                      ? AppStrings.of(context).t('invalid')
+                      : null),
               maxLength: maxLength,
               maxLines: maxLines,
               keyboardType: keyboardType,
@@ -146,51 +145,89 @@ class _InquiryFormScreenState extends State<InquiryFormScreen> {
 
   @override
   Widget build(BuildContext context) => AppPage(
-      title: 'ඔබේ තොරතුරු පහත පුරවන්න',
+      title: AppStrings.of(context).t('formTitle'),
       child: ListView(padding: const EdgeInsets.all(16), children: [
-        Text(widget.loan?.name ?? 'සාමාන්‍ය විමසීම',
+        Text(widget.loan?.name ?? AppStrings.of(context).t('general'),
             style: Theme.of(context).textTheme.titleLarge),
+        if (AppStrings.of(context).language != 'si')
+          Text(AppStrings.of(context).t('catalogueLanguage')),
         const SizedBox(height: 16),
         Form(
             key: _form,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _field('name', 'නම', Validators.name, maxLength: 60),
-                  _field('age', 'වයස (අවු. 18–99)', Validators.age,
-                      maxLength: 2, keyboardType: TextInputType.number),
-                  _field('nic', 'ජාතික හැඳුනුම්පත් අංකය', Validators.nic,
+                  _field(
+                      'name',
+                      AppStrings.of(context).t('name'),
+                      (value) => Validators.name(value,
+                          strings: AppStrings.of(context)),
+                      maxLength: 60),
+                  _field(
+                      'age',
+                      AppStrings.of(context).t('age'),
+                      (value) => Validators.age(value,
+                          strings: AppStrings.of(context)),
+                      maxLength: 2,
+                      keyboardType: TextInputType.number),
+                  _field(
+                      'nic',
+                      AppStrings.of(context).t('nic'),
+                      (value) => Validators.nic(value,
+                          strings: AppStrings.of(context)),
                       maxLength: 12),
                   DropdownButtonFormField<String>(
                       key: const ValueKey('sex'),
                       value: _sex,
                       isExpanded: true,
-                      decoration: const InputDecoration(
-                          labelText: 'ස්ත්‍රී / පුරුෂ භාවය',
-                          border: OutlineInputBorder()),
-                      items: const [
-                        DropdownMenuItem(value: 'male', child: Text('පුරුෂ')),
+                      decoration: InputDecoration(
+                          labelText: AppStrings.of(context).t('sex'),
+                          border: const OutlineInputBorder()),
+                      items: [
                         DropdownMenuItem(
-                            value: 'female', child: Text('ස්ත්‍රී'))
+                            value: 'male',
+                            child: Text(AppStrings.of(context).t('male'))),
+                        DropdownMenuItem(
+                            value: 'female',
+                            child: Text(AppStrings.of(context).t('female')))
                       ],
                       onChanged: _locked
                           ? null
                           : (value) => setState(() {
                                 _sex = value;
                               }),
-                      validator: Validators.requiredText),
+                      validator: (value) => Validators.requiredText(value,
+                          strings: AppStrings.of(context))),
                   const SizedBox(height: 16),
-                  _field('telephone', 'දුරකථන අංකය', Validators.telephone,
-                      maxLength: 10, keyboardType: TextInputType.phone),
-                  _field('address', 'ලිපිනය', Validators.requiredText,
-                      maxLength: 120, maxLines: 2),
                   _field(
-                      'email', 'විද්‍යුත් ලිපිනය (තිබේනම්)', Validators.email,
-                      maxLength: 254, keyboardType: TextInputType.emailAddress),
-                  _field('message', 'අමතර කරුණු / විමසීම්', (_) => null,
+                      'telephone',
+                      AppStrings.of(context).t('telephone'),
+                      (value) => Validators.telephone(value,
+                          strings: AppStrings.of(context)),
+                      maxLength: 10,
+                      keyboardType: TextInputType.phone),
+                  _field(
+                      'address',
+                      AppStrings.of(context).t('address'),
+                      (value) => Validators.requiredText(value,
+                          strings: AppStrings.of(context)),
+                      maxLength: 120,
+                      maxLines: 2),
+                  _field(
+                      'email',
+                      AppStrings.of(context).t('email'),
+                      (value) => Validators.email(value,
+                          strings: AppStrings.of(context)),
+                      maxLength: 254,
+                      keyboardType: TextInputType.emailAddress),
+                  _field('message', AppStrings.of(context).t('message'),
+                      (_) => null,
                       maxLength: 500, maxLines: 3),
                   FormField<Branch>(
-                      validator: (_) => _branch == null ? Si.required : null,
+                      validator: (_) => _branch == null
+                          ? AppStrings.of(context).t('required')
+                          : null,
                       builder: (state) => Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
@@ -199,7 +236,8 @@ class _InquiryFormScreenState extends State<InquiryFormScreen> {
                                     onPressed: _locked ? null : _chooseBranch,
                                     icon: const Icon(Icons.search),
                                     label: Text(_branch?.name ??
-                                        'ඔබට ළඟම බැංකු ශාඛාව තෝරන්න')),
+                                        AppStrings.of(context)
+                                            .t('chooseBranch'))),
                                 if (state.hasError)
                                   Text(state.errorText!,
                                       style: TextStyle(
@@ -208,22 +246,24 @@ class _InquiryFormScreenState extends State<InquiryFormScreen> {
                                               .error)),
                               ])),
                   const SizedBox(height: 16),
-                  const Text(Si.contactNotice),
+                  Text(AppStrings.of(context).t('contactNotice')),
                   CheckboxListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text(Si.consent),
+                      title: Text(AppStrings.of(context).t('consent')),
                       value: _consent,
                       onChanged: _locked
                           ? null
                           : (value) => setState(() {
                                 _consent = value ?? false;
                               })),
-                  if (_error != null)
+                  if (_errorKey != null)
                     Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Text(_error!, style: roleStyle(context))),
+                        child: Text(AppStrings.of(context).t(_errorKey!),
+                            style: roleStyle(context))),
                   if (_receipt != null)
-                    SelectableText('${Si.received} ${_receipt!.reference}'),
+                    SelectableText(
+                        "${AppStrings.of(context).t('received')} ${_receipt!.reference}"),
                   if (_receipt == null)
                     ElevatedButton(
                         key: const ValueKey('submit'),
@@ -231,10 +271,10 @@ class _InquiryFormScreenState extends State<InquiryFormScreen> {
                         child: Padding(
                             padding: const EdgeInsets.all(12),
                             child: Text(_submitting
-                                ? Si.submitting
+                                ? AppStrings.of(context).t('submitting')
                                 : _pending != null
-                                    ? 'නැවත උත්සාහ කරන්න'
-                                    : Si.submit))),
+                                    ? AppStrings.of(context).t('retry')
+                                    : AppStrings.of(context).t('submit')))),
                 ])),
       ]));
 
@@ -257,13 +297,14 @@ class _BranchPickerState extends State<_BranchPicker> {
         .where((b) => b.name.toLowerCase().contains(_query.toLowerCase()))
         .toList();
     return AlertDialog(
-        title: const Text('බැංකු ශාඛාව'),
+        title: Text(AppStrings.of(context).t('branch')),
         content: SizedBox(
             width: 400,
             height: 400,
             child: Column(children: [
               TextField(
-                  decoration: const InputDecoration(labelText: 'ශාඛාව සොයන්න'),
+                  decoration: InputDecoration(
+                      labelText: AppStrings.of(context).t('searchBranch')),
                   onChanged: (value) => setState(() {
                         _query = value;
                       })),
@@ -277,7 +318,7 @@ class _BranchPickerState extends State<_BranchPicker> {
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('ආපසු'))
+              child: Text(AppStrings.of(context).t('back')))
         ]);
   }
 }

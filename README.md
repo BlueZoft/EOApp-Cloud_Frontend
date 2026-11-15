@@ -1,6 +1,6 @@
-# Hetarata / Entrepreneur Outreach frontend — 1.2
+# Hetarata / Entrepreneur Outreach frontend — 1.3
 
-Flutter Sinhala credit catalogue and inquiry form. Users choose a funding category, browse 15 retained schemes, inspect terms, and submit a scheme-specific or general inquiry to the Express API. Loan rates/text and branch names are unchanged; this release does not verify their present availability.
+Flutter credit catalogue and inquiry form with a Sinhala/English/Tamil customer interface. Users search/filter the 15 retained schemes, compare two or three, inspect terms, and submit a scheme-specific or general inquiry to the Express API. Loan rates/text and branch names are unchanged; this release does not verify their present availability.
 
 ## Develop and build
 
@@ -30,9 +30,9 @@ See [architecture and release notes](docs/ARCHITECTURE.md) for API changes, dupl
 
 ## Checks
 
-Tests cover validators, API error contracts, timeout handling, retry keys, receipt parsing, narrow-screen form layout and submission state. No test sends real email. Validate a production build against its intended HTTPS backend before release; a local web build alone does not verify deployment routing, real SMTP or Android/iOS packaging.
+Tests cover discovery/comparison, customer locales, validators, API contracts, timeouts/retry keys, receipt parsing, staff access flows and narrow-screen layouts. No test sends real email. Validate a production build against its intended HTTPS backend before release; a local web build alone does not verify deployment routing, real SMTP or Android/iOS packaging.
 
-Web builds load their bundled CanvasKit renderer and Noto Sans Sinhala font locally, avoiding renderer/font CDN dependencies. Bundled fonts: Noto Sans Sinhala ([license](assets/fonts/OFL.txt)) and Roboto ([license](assets/fonts/Roboto-OFL.txt)), obtained from the Google Fonts repository under the SIL Open Font License. Distribute the entire `build/web` output, including `canvaskit/` and `assets/`.
+Web builds load their bundled CanvasKit renderer and Noto Sans Sinhala/Tamil fonts locally, avoiding renderer/font CDN dependencies. Bundled fonts: Noto Sans Sinhala ([license](assets/fonts/OFL.txt)), Noto Sans Tamil ([license](assets/fonts/NotoSansTamil-OFL.txt)) and Roboto ([license](assets/fonts/Roboto-OFL.txt)), obtained from the Google Fonts repository under the SIL Open Font License. Distribute the entire `build/web` output, including `canvaskit/` and `assets/`.
 
 ## Real-world configuration placeholders
 
@@ -45,3 +45,7 @@ See [release checklist](docs/RELEASE.md) for Android/iOS identity and signing pl
 ## Officer inbox
 
 The web welcome screen includes an opt-in, authenticated staff workflow for institutional follow-up. See [staff portal guide](docs/STAFF.md) and the backend provisioning instructions. No default login or institution associations are shipped. Customer catalogue content is unchanged; the staff portal currently uses English labels.
+
+## Search, comparison and language support
+
+See [discovery and language guide](docs/DISCOVERY.md). Customer interface text is available in Sinhala, English and Tamil; original scheme/branch content remains Sinhala and staff screens remain English. Search and purpose filtering are local. The preparation guide helps frame an inquiry and does not assess eligibility. Comparison preserves conditional rates/limits exactly as listed. Native-speaker review and approved translations of financial content remain real-world review inputs.

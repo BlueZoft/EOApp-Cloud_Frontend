@@ -194,11 +194,12 @@ void main() {
         base: Uri.parse('https://test/api/v1/staff/'),
         client: MockClient((req) async {
           requests.add(req);
-          if (req.url.path.endsWith('/session'))
+          if (req.url.path.endsWith('/session')) {
             return response({
               'staff': {'id': 'admin', 'name': 'Admin', 'role': 'admin'},
               'csrfToken': 'test-csrf'
             });
+          }
           return response({
             'inquiry': {
               ...inquiry(version: req.method == 'PATCH' ? 1 : 0),
@@ -218,7 +219,8 @@ void main() {
         ])));
     await tester.pumpAndSettle();
     final field = find.byKey(const ValueKey('institution-0'));
-    await tester.scrollUntilVisible(field, 300, scrollable: find.byType(Scrollable).first);
+    await tester.scrollUntilVisible(field, 300,
+        scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
     await tester.tap(field);
     await tester.pumpAndSettle();

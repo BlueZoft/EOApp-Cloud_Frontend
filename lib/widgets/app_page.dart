@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_strings.dart';
 
 class AppPage extends StatelessWidget {
   final String title;
@@ -7,8 +8,9 @@ class AppPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(title: Text(title), actions: [
+        const LanguagePicker(),
         IconButton(
-            tooltip: 'මුල් පිටුව',
+            tooltip: AppStrings.of(context).t('home'),
             icon: const Icon(Icons.home),
             onPressed: () =>
                 Navigator.popUntil(context, (route) => route.isFirst))

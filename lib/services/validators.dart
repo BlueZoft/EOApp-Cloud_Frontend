@@ -1,29 +1,34 @@
-import '../l10n/si.dart';
+import '../l10n/app_strings.dart';
+import '../l10n/translations.dart';
 
 class Validators {
-  static String? requiredText(String? value) =>
-      value == null || value.trim().isEmpty ? Si.required : null;
-  static String? name(String? value) =>
-      requiredText(value) ??
+  static String text(AppStrings? strings, String key) =>
+      strings?.t(key) ?? uiTranslations['si']![key]!;
+  static String? requiredText(String? value, {AppStrings? strings}) =>
+      value == null || value.trim().isEmpty ? text(strings, 'required') : null;
+  static String? name(String? value, {AppStrings? strings}) =>
+      requiredText(value, strings: strings) ??
       ((value!.trim().length < 4 || value.trim().length > 60)
-          ? Si.invalid
+          ? text(strings, 'invalid')
           : null);
-  static String? age(String? value) {
+  static String? age(String? value, {AppStrings? strings}) {
     final age = int.tryParse(value?.trim() ?? '');
     return age == null || age < 18 || age > 99
-        ? 'වයස අවුරුදු 18 සිට 99 දක්වා ඇතුළත් කරන්න'
+        ? text(strings, 'ageError')
         : null;
   }
 
-  static String? nic(String? value) =>
+  static String? nic(String? value, {AppStrings? strings}) =>
       RegExp(r'^([0-9]{9}[xXvV]|[0-9]{12})$').hasMatch(value?.trim() ?? '')
           ? null
-          : Si.invalid;
-  static String? telephone(String? value) =>
-      RegExp(r'^0[0-9]{9}$').hasMatch(value?.trim() ?? '') ? null : Si.invalid;
-  static String? email(String? value) => value == null ||
+          : text(strings, 'invalid');
+  static String? telephone(String? value, {AppStrings? strings}) =>
+      RegExp(r'^0[0-9]{9}$').hasMatch(value?.trim() ?? '')
+          ? null
+          : text(strings, 'invalid');
+  static String? email(String? value, {AppStrings? strings}) => value == null ||
           value.trim().isEmpty ||
           RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value.trim())
       ? null
-      : Si.invalid;
+      : text(strings, 'invalid');
 }

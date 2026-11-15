@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.0+4 — 2026-11-15
+
+- Added local multi-word scheme search and purpose filters, including translated category-name indexing.
+- Added two/three-scheme comparison with selections retained across filtering, original conditional terms and horizontal scrolling on narrow screens.
+- Added guided inquiry preparation: purpose selects a category and business stage changes preparation tips. No eligibility/affordability decision is made.
+- Added Sinhala/English/Tamil customer interface resources, a session language selector, localized form validation/consent/receipts and bundled Noto Sans Tamil font.
+- Preserved the original scheme/branch catalogue. Other interface languages explain the Sinhala content fallback; staff labels remain English.
+- Updated the contact notice to describe the existing responsible-institution routing, and documented translation review and missing verified eligibility inputs.
+
+Validation: 17 frontend tests passed, analyzer clean, release web and Android debug APK builds passed. Browser search → select two schemes → compare → switch to Tamil passed with no page errors/failed requests; narrow-screen mixed-script rendering was inspected. Catalogue text is unchanged and still matches the backend copy. Production SMTP/HTTPS configuration, approved mappings, fluent-speaker/catalogue translation review and signed store releases remain external inputs.
+
 ## 1.2.0+3 — 2026-11-15
 
 - Added a web officer portal with sign-in/session restoration/sign-out, status/reference filters, pagination and inquiry contact details.
