@@ -1,48 +1,60 @@
 import 'package:flutter/material.dart';
-import 'screen_1_category.dart';
+import 'data/catalogue_repository.dart';
+import 'models/catalogue.dart';
+import 'l10n/si.dart';
+import 'category_screen.dart';
 
-void main() => runApp(
-      MaterialApp(
-        home: Scaffold(
-            appBar: AppBar(
-              title: Text('"හෙටරට" ව්‍යවසායකත්ව විහිදුම'),
-              centerTitle: true,
-              backgroundColor: Colors.cyan,
-              shadowColor: Colors.lightBlue,
-              
-            ),
-            body: Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("fscreen.jpg"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            floatingActionButton: Container(
-              height: 130.0,
-              width: 100.0,
-              child: FittedBox(
-                child: StreamBuilder<Widget>(
-                    stream: null,
-                    builder: (context, snapshot) {
-                      return FloatingActionButton(
-                        child: Icon(Icons.arrow_forward_ios),
-                        onPressed: () {
-                          Navigator.push(
+void main() => runApp(const OutreachApp());
+
+class OutreachApp extends StatelessWidget {
+  const OutreachApp({super.key});
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+      title: 'Hetarata',
+      theme: ThemeData(
+          fontFamily: 'NotoSansSinhala',
+          colorSchemeSeed: Colors.cyan,
+          useMaterial3: true),
+      home: const WelcomeScreen());
+}
+
+class WelcomeScreen extends StatefulWidget {
+  const WelcomeScreen({super.key});
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  late Future<Catalogue> _catalogue = loadCatalogue();
+  @override
+  Widget build(BuildContext context) => Scaffold(
+      appBar: AppBar(title: const Text(Si.title)),
+      body: Container(
+          width: double.infinity,
+          decoration: const BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage('assets/fscreen.jpg'), fit: BoxFit.cover)),
+          child: Center(
+              child: FutureBuilder<Catalogue>(
+                  future: _catalogue,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return ElevatedButton(
+                          onPressed: () => setState(() {
+                                _catalogue = loadCatalogue();
+                              }),
+                          child: const Text('නැවත උත්සාහ කරන්න'));
+                    }
+                    if (!snapshot.hasData) {
+                      return const CircularProgressIndicator();
+                    }
+                    return ElevatedButton.icon(
+                        icon: const Icon(Icons.arrow_forward),
+                        label: const Text('ආරම්භ කරන්න'),
+                        onPressed: () => Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => Screen2()),
-                          );
-                        },
-                      );
-                    }),
-              ),
-            ),
-            bottomNavigationBar: BottomAppBar(
-              color: Colors.white38,
-              child: Container(height: 50.0),
-            ),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked),
-      ),
-    );
+                            MaterialPageRoute<void>(
+                                builder: (_) => CategoryScreen(
+                                    catalogue: snapshot.data!))));
+                  }))));
+}

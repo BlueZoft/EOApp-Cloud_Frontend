@@ -41,3 +41,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local deployment configuration and Android signing material
+config/*.json
+!config/*.example.json
+android/key.properties
+*.jks
+*.keystore
