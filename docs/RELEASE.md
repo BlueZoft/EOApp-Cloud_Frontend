@@ -59,3 +59,7 @@ Supply App Store metadata, privacy disclosures and provisioning through your App
 `.github/workflows/validate.yml` runs the Flutter analyzer, tests, web build and Android debug packaging without production credentials. Actual hosted run results must be checked for each pushed commit. Native store release jobs remain dependent on the identities, signing assets and platform requirements above.
 
 Local evidence: Android debug APK packaging passed; the missing-signing release guard was verified as an expected failure. Device/emulator execution, signed release bundles and iOS archives remain unverified.
+
+## Staff portal in 1.2
+
+Configure same-origin/same-site HTTPS hosting for the browser-managed staff cookie and enable/provision the backend explicitly. Staff sign-in is web-only; do not put an officer password in native/web build configuration. See [staff portal guide](STAFF.md).

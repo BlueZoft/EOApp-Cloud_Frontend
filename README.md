@@ -1,4 +1,4 @@
-# Hetarata / Entrepreneur Outreach frontend — 1.1
+# Hetarata / Entrepreneur Outreach frontend — 1.2
 
 Flutter Sinhala credit catalogue and inquiry form. Users choose a funding category, browse 15 retained schemes, inspect terms, and submit a scheme-specific or general inquiry to the Express API. Loan rates/text and branch names are unchanged; this release does not verify their present availability.
 
@@ -41,3 +41,7 @@ Copy `config/production.example.json` to ignored `config/production.json` and re
 Native store releases also need your actual Android application ID/iOS bundle ID, store display name, signing identity/keystore, and store accounts. The existing `com.example.flutter_frontend` identifier is for development. Release builds require filled, ignored signing properties and do not fall back to debug signing. iOS archive validation requires macOS/Xcode and cannot run in this Linux cloud environment.
 
 See [release checklist](docs/RELEASE.md) for Android/iOS identity and signing placeholders, debug networking, toolchain requirements and CI coverage.
+
+## Officer inbox
+
+The web welcome screen includes an opt-in, authenticated staff workflow for institutional follow-up. See [staff portal guide](docs/STAFF.md) and the backend provisioning instructions. No default login or institution associations are shipped. Customer catalogue content is unchanged; the staff portal currently uses English labels.

@@ -17,11 +17,13 @@ String newSubmissionKey() {
       24, (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0')).join();
 }
 
-Uri inquiryEndpoint() {
+Uri inquiryEndpoint() => apiEndpoint('/api/v1/inquiries');
+
+Uri apiEndpoint(String path) {
   const configured = String.fromEnvironment('API_BASE_URL');
   if (configured.isEmpty) {
     if (kIsWeb && (kDebugMode || Uri.base.scheme == 'https')) {
-      return Uri.base.resolve('/api/v1/inquiries');
+      return Uri.base.resolve(path);
     }
     throw const InquiryApiException('CONFIGURATION');
   }
@@ -37,8 +39,7 @@ Uri inquiryEndpoint() {
       base.hasFragment) {
     throw const InquiryApiException('CONFIGURATION');
   }
-  return Uri.parse(
-      '${configured.replaceAll(RegExp(r'/+$'), '')}/api/v1/inquiries');
+  return Uri.parse('${configured.replaceAll(RegExp(r'/+$'), '')}$path');
 }
 
 class InquiryApi {

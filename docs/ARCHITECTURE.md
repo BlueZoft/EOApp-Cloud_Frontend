@@ -16,4 +16,8 @@ The branch chooser is searchable and gender selection no longer uses fixed-width
 
 Both repositories should be deployed together, backend first. V1 requests use canonical names and catalogue IDs; the frontend requires a structured `received` receipt and will not interpret an arbitrary HTTP 200/error body as success. The backend retains a legacy adapter for old clients.
 
-Deferred: current scheme verification, institution/branch routing, officer dashboard and status lookup, comparison, eligibility guidance, Tamil/English translations and reduced initial identity collection. No automated financial assessment has been added.
+Deferred: current scheme verification, public status lookup, comparison, eligibility guidance, Tamil/English translations and reduced initial identity collection. Institution routing and an internal officer inbox are implemented in 1.2. No automated financial assessment has been added.
+
+## Staff portal in 1.2
+
+`staff/` contains typed staff models, a credentialed web HTTP client, portal/filter screens and inquiry detail updates. The public form retains its existing API contract. The staff API shares the configured base URL, keeps its CSRF value in memory and relies on browser-managed HttpOnly cookies. The web-only entry does not add native staff-session support. See docs/STAFF.md for deployment and workflow limits.

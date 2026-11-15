@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0+3 — 2026-11-15
+
+- Added a web officer portal with sign-in/session restoration/sign-out, status/reference filters, pagination and inquiry contact details.
+- Officers see their institution's inquiries; administrators can review unassigned inquiries and assign institutions. Status edits send an expected version and CSRF token.
+- Added a credentialed browser client using browser-managed HttpOnly cookies; no session token/password is stored in browser storage or build configuration.
+- Added explicit accessible inquiry-row actions and handling for inactive institution filters. The customer catalogue remains unchanged; staff labels are currently English.
+- Added staff setup/deployment documentation and tests for officer/admin flows, optimistic conflicts, filters and expired sessions.
+
+Validation: 11 frontend tests passed; analyzer clean, release web build and Android debug APK packaging passed. A browser check verified sign-in, same-site cross-origin credentials, scoped inquiry details and logout against a live local API. Production HTTPS deployment, real institution accounts and signed store releases still require the documented real-world configuration. Native staff sessions are not included.
+
 ## 1.1.0+2 — 2026-11-15
 
 - Replaced numbered screens with named catalogue and inquiry screens.

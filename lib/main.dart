@@ -3,6 +3,8 @@ import 'data/catalogue_repository.dart';
 import 'models/catalogue.dart';
 import 'l10n/si.dart';
 import 'category_screen.dart';
+import 'package:flutter/foundation.dart';
+import 'staff/staff_portal_screen.dart';
 
 void main() => runApp(const OutreachApp());
 
@@ -28,7 +30,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   late Future<Catalogue> _catalogue = loadCatalogue();
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(title: const Text(Si.title)),
+      appBar: AppBar(title: const Text(Si.title), actions: [
+        if (kIsWeb)
+          IconButton(
+              tooltip: 'Officer inbox',
+              icon: const Icon(Icons.work_outline),
+              onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                      builder: (_) => const StaffPortalScreen()))),
+      ]),
       body: Container(
           width: double.infinity,
           decoration: const BoxDecoration(
