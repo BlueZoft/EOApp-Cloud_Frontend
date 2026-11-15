@@ -13,3 +13,10 @@
 - Centralized Sinhala inquiry copy and documented configuration/upgrade behavior.
 
 Validation: Flutter 3.24.5 / Dart 3.5.4; analyzer clean, six tests passed, release web build passed. A Chromium smoke check traversed welcome → category → agriculture catalogue with no page errors or failed requests. Android/iOS packaging and external SMTP delivery were not tested. Current scheme verification, additional languages, officer workflows and institution routing remain deferred.
+
+### Follow-up validation and release preparation
+
+- Added GitHub Actions for analyzer/tests/web build and JDK 17 Android debug packaging.
+- Android debug APK builds successfully. Missing real signing/identity configuration causes an explicit release-task failure instead of debug-key signing.
+- Added ignored Android signing-property templates, debug-only local networking and documented production/native identity requirements.
+- iOS signing/archive checks still require macOS/Xcode and an authorized Apple Developer identity; no store release is claimed.

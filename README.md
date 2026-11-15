@@ -38,4 +38,6 @@ Web builds load their bundled CanvasKit renderer and Noto Sans Sinhala font loca
 
 Copy `config/production.example.json` to ignored `config/production.json` and replace the example API hostname with your HTTPS backend. Build using `flutter build web --dart-define-from-file=config/production.json`. This file is public build configuration: never put credentials in it. Backend SMTP values belong only in secure backend configuration.
 
-Native store releases also need your actual Android application ID/iOS bundle ID, store display name, signing identity/keystore, and store accounts. The existing `com.example.flutter_frontend` identifier and debug signing setup are development placeholders, not production release credentials. iOS archive validation requires macOS/Xcode and cannot run in this Linux cloud environment.
+Native store releases also need your actual Android application ID/iOS bundle ID, store display name, signing identity/keystore, and store accounts. The existing `com.example.flutter_frontend` identifier is for development. Release builds require filled, ignored signing properties and do not fall back to debug signing. iOS archive validation requires macOS/Xcode and cannot run in this Linux cloud environment.
+
+See [release checklist](docs/RELEASE.md) for Android/iOS identity and signing placeholders, debug networking, toolchain requirements and CI coverage.

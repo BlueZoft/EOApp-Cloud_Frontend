@@ -22,6 +22,22 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+// Store real signing information only in ignored android/key.properties.
+def signingProperties = new Properties()
+def signingFile = rootProject.file('key.properties')
+if (signingFile.exists()) {
+    signingFile.withInputStream { signingProperties.load(it) }
+}
+def releaseRequested = gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') }
+def releaseApplicationId = signingProperties.getProperty('applicationId', 'com.example.flutter_frontend')
+if (releaseRequested) {
+    def requiredKeys = ['applicationId', 'storeFile', 'storePassword', 'keyAlias', 'keyPassword']
+    if (!signingFile.exists() || requiredKeys.any { !signingProperties.getProperty(it)?.trim() || signingProperties.getProperty(it).contains('REPLACE_WITH') }
+            || releaseApplicationId == 'com.example.flutter_frontend') {
+        throw new GradleException('Release identity/signing is not configured. Copy android/key.properties.example to android/key.properties and replace every placeholder. See docs/RELEASE.md.')
+    }
+}
+
 android {
     namespace "com.example.flutter_frontend"
     compileSdk flutter.compileSdkVersion
@@ -42,7 +58,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.flutter_frontend"
+        applicationId releaseApplicationId
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion flutter.minSdkVersion
@@ -51,11 +67,21 @@ android {
         versionName flutterVersionName
     }
 
+    signingConfigs {
+        release {
+            if (signingFile.exists()) {
+                storeFile signingProperties.getProperty('storeFile') ? rootProject.file(signingProperties.getProperty('storeFile')) : null
+                storePassword signingProperties.getProperty('storePassword')
+                keyAlias signingProperties.getProperty('keyAlias')
+                keyPassword signingProperties.getProperty('keyPassword')
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            // Never silently publish an APK signed with development keys.
+            signingConfig signingConfigs.release
         }
     }
 }
