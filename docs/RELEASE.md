@@ -67,3 +67,9 @@ Configure same-origin/same-site HTTPS hosting for the browser-managed staff cook
 ## Customer discovery/languages in 1.3
 
 No new API setting, credential or data migration is required. Review the new Sinhala/English/Tamil interface text with fluent speakers, check mixed-script font rendering and confirm search/comparison on the target devices. Original Sinhala scheme/branch descriptions remain unchanged; approved translations and verified eligibility metadata are still required for those future extensions. See [discovery guide](DISCOVERY.md).
+
+## Docker host preparation
+
+The [Docker-host guide](../deploy/README.md) provides the selected same-origin HTTPS target, a Compose stack, ignored `.env.deploy`/TLS locations and an optional isolated deployment rehearsal. Real credentials/certificates remain host configuration; the normal stack does not create a production database. Keep its API private when using the explicit one-hop proxy trust setting.
+
+Local rehearsal passed on 2026-11-16 with backend 1.2.1: a browser submitted and replayed an inquiry over HTTPS, signed into the provisioned synthetic officer inbox, updated status with CSRF protection and signed out. TLS/redirects, CSP, secure cookies, body/rate limits and private/non-root containers also passed. See the Docker-host guide for the repeatable command and rollout/rollback steps. Production host/SMTP checks still require the real-world values above.

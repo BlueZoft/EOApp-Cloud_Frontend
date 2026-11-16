@@ -1,0 +1,8 @@
+{
+  "name": "eoapp-deployment-qa",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Optional local HTTPS deployment rehearsal tools; not part of the app image",
+  "devDependencies": { "playwright": "1.62.1" },
+  "engines": { "node": ">=22" }
+}

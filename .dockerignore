@@ -1,0 +1,10 @@
+**
+!build/
+!build/web/
+!build/web/**
+!deploy/
+!deploy/Dockerfile
+!deploy/nginx.conf
+!deploy/default.conf.template
+!deploy/security-headers.conf
+!deploy/05-validate-env.sh

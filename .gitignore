@@ -48,3 +48,12 @@ config/*.json
 android/key.properties
 *.jks
 *.keystore
+
+# Docker host configuration and TLS key material
+.env.deploy
+.env.deploy.*
+!.env.deploy.example
+deploy/tls/
+*.pem
+*.key
+deploy/qa/node_modules/

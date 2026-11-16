@@ -1,0 +1,61 @@
+# One public edge. Client-supplied forwarding headers are overwritten.
+limit_req_zone $binary_remote_addr zone=inquiries:10m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=staff_login:10m rate=2r/m;
+limit_req_status 429;
+server_tokens off;
+resolver 127.0.0.11 ipv6=off valid=10s;
+server {
+    listen 8080;
+    server_name ${SERVER_NAME};
+    location = /healthz { access_log off; return 200 'ok'; }
+    location / { return 308 ${PUBLIC_ORIGIN}$request_uri; }
+}
+server {
+    listen 8443 ssl;
+    http2 on;
+    server_name ${SERVER_NAME};
+    ssl_certificate /etc/nginx/tls/fullchain.pem;
+    ssl_certificate_key /etc/nginx/tls/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:TLS:10m;
+    root /usr/share/nginx/html;
+    index index.html;
+    client_max_body_size 16k;
+    include /etc/nginx/security-headers.conf;
+    # Store static assets but revalidate on use; API no-store remains intact.
+    expires -1;
+    set $api_backend http://api:5000;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_connect_timeout 5s;
+    proxy_read_timeout 35s;
+    error_page 429 = @rate_limited;
+    error_page 413 = @too_large;
+    location @rate_limited {
+        include /etc/nginx/security-headers.conf;
+        add_header Retry-After 60 always;
+        default_type application/json;
+        return 429 '{"error":{"code":"RATE_LIMITED","message":"Please wait before trying again"}}';
+    }
+    location @too_large {
+        default_type application/json;
+        return 413 '{"error":{"code":"BODY_TOO_LARGE","message":"Request body exceeds 16 KiB"}}';
+    }
+    location = /api/ready { proxy_pass $api_backend/ready; }
+    location ~ ^/api/(v1/inquiries|userdata)/?$ {
+        limit_req zone=inquiries burst=5 nodelay;
+        proxy_pass $api_backend;
+    }
+    location = /api/v1/staff/login {
+        limit_req zone=staff_login burst=4 nodelay;
+        proxy_pass $api_backend;
+    }
+    location /api/ { proxy_pass $api_backend; }
+    location ~ /\. { return 404; }
+    location = /index.html { try_files $uri =404; }
+    location ~* \.(js|json|wasm|ttf|woff2?|png|jpg|jpeg|svg|ico)$ { try_files $uri =404; }
+    location / { try_files $uri $uri/ /index.html; }
+}

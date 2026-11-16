@@ -49,3 +49,7 @@ The web welcome screen includes an opt-in, authenticated staff workflow for inst
 ## Search, comparison and language support
 
 See [discovery and language guide](docs/DISCOVERY.md). Customer interface text is available in Sinhala, English and Tamil; original scheme/branch content remains Sinhala and staff screens remain English. Search and purpose filtering are local. The preparation guide helps frame an inquiry and does not assess eligibility. Comparison preserves conditional rates/limits exactly as listed. Native-speaker review and approved translations of financial content remain real-world review inputs.
+
+## Docker-host HTTPS deployment
+
+See [Docker host guide](deploy/README.md) for a private API behind a non-root HTTPS proxy, configuration/TLS placeholders, same-origin builds, operator provisioning and a disposable full-stack rehearsal. `scripts/build-web-deploy.sh` produces the Docker bundle and public build metadata. No production database, certificate or staff identity is created automatically.

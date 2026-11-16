@@ -1,5 +1,15 @@
 # Changelog
 
+## Docker deployment preparation — 2026-11-16
+
+- Added a same-origin web bundle script with public source/version metadata, a digest-pinned non-root nginx image and a private API/HTTPS edge Compose stack.
+- Added TLS/configuration validation, overwritten forwarding headers, CSP/security headers, JSON body/rate-limit errors and bounded logs. The matching backend 1.2.1 explicitly trusts this single private proxy hop.
+- Added ignored real-world configuration/TLS placeholders and an operator guide covering provisioning, certificate renewal, rollout and rollback.
+- Added a disposable HTTPS/browser rehearsal with synthetic institutions, generated credentials, an isolated MongoDB volume and disabled SMTP. Fixed text entry to wait for Flutter's focus/semantics update before filling fields.
+- CI now builds the same-origin bundle and web image alongside existing Flutter checks.
+
+Validation: all 17 Flutter tests passed, analyzer clean, release web bundle/image build passed, and the full local HTTPS rehearsal passed public browser submission/replay, staff cookies/login/CSRF update/logout, CSP, body/rate limits, redirects, verified TLS, private API and non-root runtime checks. The matching backend passed all 28 tests; backend production and QA dependency audits reported zero known vulnerabilities. Temporary QA resources were removed. Production host/mailbox validation and signed native releases still need the documented external inputs.
+
 ## 1.3.0+4 — 2026-11-15
 
 - Added local multi-word scheme search and purpose filters, including translated category-name indexing.
