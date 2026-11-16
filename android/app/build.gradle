@@ -22,9 +22,10 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-// Store real signing information only in ignored android/key.properties.
+// Store signing information in an ignored file. The optional path override lets
+// rehearsal builds use disposable identities without replacing operator keys.
 def signingProperties = new Properties()
-def signingFile = rootProject.file('key.properties')
+def signingFile = rootProject.file(System.getenv('EOAPP_SIGNING_PROPERTIES') ?: 'key.properties')
 if (signingFile.exists()) {
     signingFile.withInputStream { signingProperties.load(it) }
 }

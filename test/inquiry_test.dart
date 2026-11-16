@@ -166,6 +166,13 @@ void main() {
     expect(
         seen[0].headers['Idempotency-Key'], seen[1].headers['Idempotency-Key']);
     expect(find.textContaining('ref-2'), findsOneWidget);
+    final semantics = tester.ensureSemantics();
+    try {
+      await tester.pump();
+      expect(find.bySemanticsLabel(RegExp('ref-2')), findsOneWidget);
+    } finally {
+      semantics.dispose();
+    }
     expect(find.byKey(const ValueKey('submit')), findsNothing);
     expect(tester.takeException(), isNull);
   });

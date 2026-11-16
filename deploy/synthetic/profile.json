@@ -1,0 +1,31 @@
+{
+  "synthetic": true,
+  "label": "SYNTHETIC DEMO — no real institutions or applicants",
+  "directory": {
+    "institutions": [
+      {"code": "demo-enterprise", "name": "SYNTHETIC Enterprise Credit Team", "notificationEmail": "enterprise@demo.test"},
+      {"code": "demo-growth", "name": "SYNTHETIC Growth Credit Team", "notificationEmail": "growth@demo.test"}
+    ],
+    "rules": [
+      {"loanId": "general", "branchId": "*", "institutionCode": "demo-enterprise"},
+      {"loanId": "loan-01", "branchId": "*", "institutionCode": "demo-growth"}
+    ]
+  },
+  "staff": [
+    {"email": "officer@demo.test", "name": "SYNTHETIC Enterprise Officer", "role": "officer", "institution": "demo-enterprise"},
+    {"email": "growth-officer@demo.test", "name": "SYNTHETIC Growth Officer", "role": "officer", "institution": "demo-growth"},
+    {"email": "admin@demo.test", "name": "SYNTHETIC Administrator", "role": "admin"}
+  ],
+  "applicant": {
+    "name": "Synthetic HTTPS Applicant", "age": 30, "nic": "199012345678", "sex": "female",
+    "telephone": "0771234567", "address": "Synthetic deployment test address",
+    "email": "applicant@demo.test", "message": "SYNTHETIC inquiry: do not contact this identity",
+    "loanId": "general", "branchId": "branch-001", "consent": true
+  },
+  "operations": {
+    "owner": "SYNTHETIC Demo Operations", "alertMailbox": "operations@demo.test",
+    "retentionDays": 7, "backupIntervalHours": 24,
+    "note": "Example policy for synthetic data only; replace with owner-approved production policy."
+  },
+  "native": {"applicationId": "org.example.eoapp.synthetic", "apiBaseUrl": "https://localhost:8443"}
+}

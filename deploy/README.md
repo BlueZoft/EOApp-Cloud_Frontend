@@ -17,7 +17,8 @@ Use Docker Engine/Compose v2, the documented Flutter 3.24.5 SDK, and the backend
 - `Dockerfile`: serves an already-built web bundle as non-root nginx UID 101.
 - `compose.yaml`: private API plus HTTPS edge; no production database is created.
 - `.env.deploy.example` in the frontend root: deliberately unusable real-world placeholders.
-- `qa/`: optional, local-only integration rehearsal using temporary certificates and synthetic data.
+- `qa/`: local-only integration rehearsal using temporary certificates and synthetic data.
+- `synthetic/`: replaceable fixtures, private STARTTLS mail capture and [synthetic release guide](synthetic/README.md).
 
 ## Build a release bundle
 
@@ -112,7 +113,7 @@ Enable SMTP only after rotating the historical password and configuring an appro
 
 ## Optional disposable HTTPS rehearsal
 
-This does not use `.env.deploy` or production data. It forces a synthetic MongoDB URI, disabled SMTP, temporary TLS files, generated test credentials and a UUID project name; cleanup removes only that project's containers, volume and network. Run it on the local Docker host with both repositories present.
+This does not use `.env.deploy` or production data. It forces a synthetic MongoDB URI, private authenticated STARTTLS capture, temporary TLS files, generated test credentials and a UUID project name; cleanup removes only that project's containers, volume and network. Run it on the local Docker host with both repositories present. `--keep` retains a successful loopback demo and private reports; `--stop` removes only that demo. See the [synthetic release guide](synthetic/README.md) for fixture replacement and evidence.
 
 ```sh
 npm ci --prefix deploy/qa
@@ -120,7 +121,7 @@ cd deploy/qa && npx playwright install chromium && cd ../..
 python3 deploy/qa/run.py
 ```
 
-Python 3, Node 22+, OpenSSL, Docker and an installed Chromium are needed only for this optional test. `CHROMIUM_EXECUTABLE=/path/to/chromium` selects an existing browser. `--docker-host` selects the same engine used for builds. If images were prebuilt with environment-specific trust settings, use `--no-build --release-tag deploy-validation` with `eoapp-api:deploy-validation` and `eoapp-web:deploy-validation`.
+Python 3, Node 22+, OpenSSL, Docker and an installed Chromium are needed only for this optional test. `CHROMIUM_EXECUTABLE=/path/to/chromium` selects an existing browser. `--docker-host` selects the same engine used for builds. If images were prebuilt with environment-specific trust settings, use `--no-build --release-tag deploy-validation` with `eoapp-api:deploy-validation`, `eoapp-web:deploy-validation` and `eoapp-synthetic-mail:deploy-validation`.
 
 The rehearsal verifies real TLS chain/hostname checking, HTTP redirect, static/API error behavior, public submission/replay, Secure/HttpOnly/Strict staff cookies, CSRF-protected updates, logout, CSP, body limits, rate limits and private/non-root containers. Chromium trusts only the generated local test certificate's pinned public key; Python/Node separately validate its full CA chain and hostname. The helper refuses non-loopback targets and never uses a global `ignoreHTTPSErrors` setting. Production browsers use normal certificate trust with no test flags.
 

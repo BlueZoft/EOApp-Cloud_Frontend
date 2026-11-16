@@ -22,8 +22,8 @@ server {
     index index.html;
     client_max_body_size 16k;
     include /etc/nginx/security-headers.conf;
-    # Store static assets but revalidate on use; API no-store remains intact.
-    expires -1;
+    # Set expiry only in static locations. A server-wide expires directive
+    # would overwrite the API's no-store policy, including staff responses.
     set $api_backend http://api:5000;
     proxy_http_version 1.1;
     proxy_set_header Host $host;
@@ -55,7 +55,7 @@ server {
     }
     location /api/ { proxy_pass $api_backend; }
     location ~ /\. { return 404; }
-    location = /index.html { try_files $uri =404; }
-    location ~* \.(js|json|wasm|ttf|woff2?|png|jpg|jpeg|svg|ico)$ { try_files $uri =404; }
-    location / { try_files $uri $uri/ /index.html; }
+    location = /index.html { expires -1; try_files $uri =404; }
+    location ~* \.(js|json|wasm|ttf|woff2?|png|jpg|jpeg|svg|ico)$ { expires -1; try_files $uri =404; }
+    location / { expires -1; try_files $uri $uri/ /index.html; }
 }

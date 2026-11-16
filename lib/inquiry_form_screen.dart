@@ -263,7 +263,9 @@ class _InquiryFormScreenState extends State<InquiryFormScreen> {
                             style: roleStyle(context))),
                   if (_receipt != null)
                     SelectableText(
-                        "${AppStrings.of(context).t('received')} ${_receipt!.reference}"),
+                        "${AppStrings.of(context).t('received')} ${_receipt!.reference}",
+                        semanticsLabel:
+                            "${AppStrings.of(context).t('received')} ${_receipt!.reference}"),
                   if (_receipt == null)
                     ElevatedButton(
                         key: const ValueKey('submit'),

@@ -1,0 +1,8 @@
+{
+  "name": "eoapp-synthetic-mail-capture",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local-only authenticated STARTTLS capture; never relays email",
+  "dependencies": {"smtp-server": "3.21.4"},
+  "engines": {"node": ">=22 <25"}
+}

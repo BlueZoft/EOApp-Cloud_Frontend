@@ -57,3 +57,6 @@ deploy/tls/
 *.pem
 *.key
 deploy/qa/node_modules/
+deploy/synthetic/mail/node_modules/
+deploy/.synthetic/
+deploy/.synthetic-android/

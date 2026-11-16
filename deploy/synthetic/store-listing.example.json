@@ -1,0 +1,12 @@
+{
+  "synthetic": true,
+  "displayName": "SYNTHETIC Hetarata Demo",
+  "androidApplicationId": "org.example.eoapp.synthetic",
+  "iosBundleId": "org.example.eoapp.synthetic",
+  "supportEmail": "support@demo.test",
+  "privacyPolicyUrl": "https://privacy.demo.test/synthetic-only",
+  "shortDescription": "Synthetic rehearsal of business credit catalogue and inquiry workflows.",
+  "releaseNotes": "SYNTHETIC ONLY. No credit approval or verified current financial offering is implied.",
+  "distribution": "Local validation only; do not upload this identity/key/listing to a public store.",
+  "replaceBeforeRelease": ["approved app name and identifiers", "organization support address", "published privacy policy", "store disclosures and screenshots", "production signing/provisioning", "current target SDK and store policy review"]
+}

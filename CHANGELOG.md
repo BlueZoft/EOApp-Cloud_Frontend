@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.1+5 — 2026-11-16
+
+- Added a replaceable, explicitly synthetic release profile for fictional institutions, scoped staff, applicant data, example operating policies and native identity/listing fields.
+- Extended the local HTTPS runner with optional retained demo state, generated credentials, private authenticated STARTTLS mail capture, routed recipient checks, backup/restore and synthetic retention/outage/recovery exercises. Real provider settings and production Compose defaults remain separate.
+- Added mobile-width Sinhala/English/Tamil screenshots and administrator/cross-institution checks to the browser rehearsal.
+- Fixed the inquiry receipt's accessibility label so its reference is exposed without focusing selectable text; strengthened the existing form regression test.
+- Restricted nginx static-cache directives to static locations so API/staff responses retain `Cache-Control: no-store`. The browser check waits for logout completion before verifying session revocation.
+- Added an isolated synthetic Android signing/bundle verification helper and secure signing-properties path override. CI builds/uploads only the generated test AAB/report, never its private keys.
+- Documented replacement paths and distinguished local synthetic evidence from actual provider, native-device, human translation and store checks.
+
 ## Docker deployment preparation — 2026-11-16
 
 - Added a same-origin web bundle script with public source/version metadata, a digest-pinned non-root nginx image and a private API/HTTPS edge Compose stack.

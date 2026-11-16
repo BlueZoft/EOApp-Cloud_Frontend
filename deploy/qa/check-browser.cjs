@@ -1,5 +1,11 @@
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
+const { readFileSync, writeFileSync } = require('node:fs');
+const { join } = require('node:path');
+const profile = JSON.parse(readFileSync(process.env.DEPLOY_SYNTHETIC_PROFILE, 'utf8'));
+assert.equal(profile.synthetic, true);
+const applicant = profile.applicant;
+const staff = profile.staff;
 const base = process.env.DEPLOY_BASE_URL;
 const url = new URL(base);
 assert.equal(url.protocol, 'https:');
@@ -16,8 +22,11 @@ async function main() {
   try {
     page = await browser.newPage({ viewport: { width: 1200, height: 1800 } });
     const errors = [], failed = [], violations = [];
+    const statuses = new WeakMap();
     page.on('pageerror', error => errors.push(error.message));
-    page.on('requestfailed', request => failed.push(new URL(request.url()).pathname));
+    page.on('response', response => statuses.set(response.request(), response.status()));
+    page.on('requestfailed', request => failed.push({ path: new URL(request.url()).pathname,
+      method: request.method(), error: request.failure()?.errorText, status: statuses.get(request) }));
     await page.exposeFunction('__recordDeploymentCsp', directive => violations.push(directive));
     await page.addInitScript(() => {
       document.addEventListener('securitypolicyviolation', e => window.__recordDeploymentCsp(e.violatedDirective));
@@ -32,8 +41,17 @@ async function main() {
     await page.goto(base);
     await page.waitForSelector('flutter-view', { state: 'attached', timeout: 30000 });
     await page.locator('flt-semantics-placeholder').evaluate(element => element.click());
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.screenshot({ path: join(process.env.DEPLOY_REPORT_DIR, 'welcome-sinhala-mobile.png') });
     await tap(page.getByRole('button', { name: 'සිංහල', exact: true }));
+    await tap(page.getByRole('button', { name: 'தமிழ்', exact: true }));
+    await page.getByRole('button', { name: 'English', exact: true }).waitFor({ state: 'hidden' });
+    await page.screenshot({ path: join(process.env.DEPLOY_REPORT_DIR, 'welcome-tamil-mobile.png') });
+    await tap(page.getByRole('button', { name: 'தமிழ்', exact: true }));
     await tap(page.getByRole('button', { name: 'English', exact: true }));
+    await page.getByRole('button', { name: 'සිංහල', exact: true }).waitFor({ state: 'hidden' });
+    await page.screenshot({ path: join(process.env.DEPLOY_REPORT_DIR, 'welcome-english-mobile.png') });
+    await page.setViewportSize({ width: 1200, height: 1800 });
     await tap(page.getByRole('button', { name: 'Get started', exact: true }));
     await tap(page.getByRole('button', { name: /My purpose is not listed/ }));
     async function fill(label, value) {
@@ -48,22 +66,40 @@ async function main() {
       await page.keyboard.press('Tab');
       assert.equal(await input.inputValue(), value, label + ' was not entered');
     }
-    await fill('Name', 'Synthetic HTTPS Applicant');
-    await fill('Age (18–99)', '30');
-    await fill('National identity card number', '199012345678');
+    await fill('Name', applicant.name);
+    await fill('Age (18–99)', String(applicant.age));
+    await fill('National identity card number', applicant.nic);
     await tap(page.getByRole('button', { name: 'Gender', exact: true }));
     await tap(page.getByRole('button', { name: 'Female', exact: true }));
-    await fill('Telephone', '0771234567');
-    await fill('Address', 'Synthetic deployment test address');
+    await fill('Telephone', applicant.telephone);
+    await fill('Address', applicant.address);
+    await fill('Email (optional)', applicant.email);
+    await fill('Additional details / inquiry', applicant.message);
     await tap(page.getByRole('button', { name: 'Choose a preferred branch', exact: true }));
-    await tap(page.getByText('අගලවත්ත', { exact: true }).or(page.locator('[aria-label="අගලවත්ත"]')).first());
+    const catalogue = JSON.parse(readFileSync(join(__dirname, '../../assets/catalogue.json'), 'utf8'));
+    const branch = catalogue.branches.find(item => item.id === applicant.branchId);
+    assert.ok(branch, 'Synthetic branch must exist in the retained catalogue');
+    await tap(page.getByText(branch.name, { exact: true }).or(page.getByLabel(branch.name, { exact: true })).first());
     await tap(page.getByRole('checkbox', { name: 'I agree to these details being used to contact me about my inquiry.', exact: true }));
     const incoming = page.waitForResponse(r => r.url() === base + '/api/v1/inquiries' && r.request().method() === 'POST');
     await tap(page.getByRole('button', { name: 'Send inquiry', exact: true }));
     const response = await incoming;
     assert.equal(response.status(), 201);
+    assert.equal(response.headers()['cache-control'], 'no-store');
     const receipt = await response.json();
     assert.equal(receipt.inquiry.status, 'received');
+    // Playwright locators pierce Flutter's shadow root; document queries do
+    // not. SelectableText may split the copy and reference across nodes.
+    let receiptRendered = false;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      receiptRendered = await page.locator('flt-semantics,input,textarea').evaluateAll((elements, reference) =>
+        elements.some(element => [element.textContent, element.getAttribute('aria-label'), element.value,
+          element.getAttribute('aria-valuetext')].some(value => typeof value === 'string' && value.includes(reference))), receipt.inquiry.reference);
+      if (receiptRendered) break;
+      await page.waitForTimeout(100);
+    }
+    assert.ok(receiptRendered, 'The returned inquiry reference must appear in the rendered semantics');
+    await page.screenshot({ path: join(process.env.DEPLOY_REPORT_DIR, 'inquiry-receipt.png') });
     const original = response.request();
     const payload = original.postData();
     const key = original.headers()['idempotency-key'];
@@ -78,27 +114,56 @@ async function main() {
     if (await placeholder.count()) await placeholder.evaluate(element => element.click());
     await tap(page.getByRole('button', { name: 'Officer inbox', exact: true }));
     // Staff labels are intentionally English regardless of customer locale.
-    await fill('Staff email', 'officer@local.test');
+    await fill('Staff email', staff[0].email);
     await fill('Password', process.env.DEPLOY_TEST_PASSWORD);
     await tap(page.getByRole('button', { name: 'Sign in', exact: true }));
-    await page.getByRole('button', { name: /Synthetic HTTPS Applicant/ }).waitFor();
+    await page.getByRole('button', { name: new RegExp(applicant.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }).waitFor();
     const cookies = await page.context().cookies(base + '/api/v1/staff/session');
     assert.ok(cookies.some(c => c.name === 'eoapp_staff' && c.secure && c.httpOnly && c.sameSite === 'Strict'));
     const mutation = await page.evaluate(async reference => {
       const target = '/api/v1/staff/inquiries/' + reference;
       const missing = await fetch(target, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ version: 0, status: 'assigned' }) });
-      const session = await (await fetch('/api/v1/staff/session')).json();
+      const sessionResponse = await fetch('/api/v1/staff/session');
+      const session = await sessionResponse.json();
       const accepted = await fetch(target, { method: 'PATCH', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': session.csrfToken }, body: JSON.stringify({ version: 0, status: 'assigned' }) });
-      return { missingStatus: missing.status, acceptedStatus: accepted.status, inquiry: (await accepted.json()).inquiry };
+      return { missingStatus: missing.status, acceptedStatus: accepted.status,
+        cacheControl: sessionResponse.headers.get('cache-control'), inquiry: (await accepted.json()).inquiry };
     }, receipt.inquiry.reference);
     assert.equal(mutation.missingStatus, 403); assert.equal(mutation.acceptedStatus, 200);
+    assert.equal(mutation.cacheControl, 'no-store');
     assert.equal(mutation.inquiry.status, 'assigned'); assert.equal(mutation.inquiry.version, 1);
     assert.equal(mutation.inquiry.nic, undefined); assert.equal(mutation.inquiry.address, undefined);
+    const logoutResponse = page.waitForResponse(r => r.url() === base + '/api/v1/staff/logout' && r.request().method() === 'POST');
     await tap(page.getByRole('button', { name: 'Sign out', exact: true }));
+    assert.equal((await logoutResponse).status(), 204);
+    await page.getByRole('textbox', { name: 'Staff email', exact: true }).waitFor();
     const signedOut = await page.evaluate(async () => (await fetch('/api/v1/staff/session')).status);
     assert.equal(signedOut, 401);
+    for (const account of staff.slice(1)) {
+      const access = await page.evaluate(async ({ account, password, reference }) => {
+        const login = await fetch('/api/v1/staff/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: account.email, password }) });
+        const session = await login.json();
+        const detail = await fetch('/api/v1/staff/inquiries/' + reference);
+        const institutions = await (await fetch('/api/v1/staff/institutions')).json();
+        const logout = await fetch('/api/v1/staff/logout', { method: 'POST', headers: {
+          'X-CSRF-Token': session.csrfToken, 'Content-Type': 'application/json' }, body: '{}' });
+        const signedOut = await fetch('/api/v1/staff/session');
+        return { login: login.status, detail: detail.status, institutions: institutions.institutions.length,
+          logout: logout.status, signedOut: signedOut.status };
+      }, { account, password: JSON.parse(process.env.DEPLOY_STAFF_PASSWORDS)[account.email], reference: receipt.inquiry.reference });
+      assert.equal(access.login, 200); assert.equal(access.logout, 204);
+      assert.equal(access.signedOut, 401);
+      assert.equal(access.detail, account.role === 'admin' ? 200 : 404);
+      assert.equal(access.institutions, account.role === 'admin' ? profile.directory.institutions.length : 1);
+    }
     assert.deepEqual(violations, []);
-    assert.deepEqual(errors, []); assert.deepEqual(failed, []);
+    assert.deepEqual(errors, []);
+    // Chromium can cancel the empty HTTP/2 response stream after receiving a
+    // successful 204. Accept only that exact case; every logout above must
+    // still return 204 and its subsequent authenticated read must return 401.
+    const emptyLogoutCancellation = request => request.path === '/api/v1/staff/logout'
+      && request.method === 'POST' && request.status === 204 && request.error === 'net::ERR_ABORTED';
+    assert.deepEqual(failed.filter(request => !emptyLogoutCancellation(request)), []);
     // The edge must not treat missing static files/API errors as SPA HTML.
     const large = await fetch(base + '/api/v1/inquiries', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'x'.repeat(20000) }) });
     assert.equal(large.status, 413); assert.equal((await large.json()).error.code, 'BODY_TOO_LARGE');
@@ -112,6 +177,12 @@ async function main() {
       assert.equal(attempt.status, 200);
     }
     assert.ok(limited, 'Forged forwarding headers must not bypass the edge limit');
+    writeFileSync(join(process.env.DEPLOY_REPORT_DIR, 'browser-report.json'), JSON.stringify({
+      synthetic: true, reference: receipt.inquiry.reference, publicSubmission: true, duplicateReplay: true,
+      staffAccessIsolation: true, csrf: true, logout: true, secureCookies: true, csp: true,
+      mobileWebLocales: ['si', 'ta', 'en'], bodyAndRateLimits: true,
+      emptyLogoutResponseCancellations: failed.filter(emptyLogoutCancellation).length,
+    }, null, 2) + '\n');
     console.log('PASS: public HTTPS submission/replay, Secure staff cookies, CSRF-protected update, logout, CSP, oversized-body rejection and edge rate limits');
   } catch (error) {
     if (page) console.error('Visible controls:', await page.getByRole('button').evaluateAll(els => els.map(e => e.getAttribute('aria-label') || e.textContent)));

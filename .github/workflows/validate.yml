@@ -19,6 +19,8 @@ jobs:
       - run: flutter test
       - run: ./scripts/build-web-deploy.sh
       - run: docker build -f deploy/Dockerfile -t eoapp-web:ci .
+      - run: python3 -m unittest discover -s deploy/qa -p 'test_*.py'
+      - run: docker build -t eoapp-synthetic-mail:ci deploy/synthetic/mail
   android-debug:
     runs-on: ubuntu-latest
     steps:
@@ -37,3 +39,12 @@ jobs:
           cache: true
       - run: flutter pub get --enforce-lockfile
       - run: flutter build apk --debug --dart-define=API_BASE_URL=http://10.0.2.2:5000
+      - run: python3 scripts/build-synthetic-android.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-android-rehearsal
+          include-hidden-files: true
+          if-no-files-found: error
+          path: |
+            deploy/.synthetic-android/synthetic-only.aab
+            deploy/.synthetic-android/report.json

@@ -1,4 +1,4 @@
-# Hetarata / Entrepreneur Outreach frontend — 1.3
+# Hetarata / Entrepreneur Outreach frontend — 1.3.1
 
 Flutter credit catalogue and inquiry form with a Sinhala/English/Tamil customer interface. Users search/filter the 15 retained schemes, compare two or three, inspect terms, and submit a scheme-specific or general inquiry to the Express API. Loan rates/text and branch names are unchanged; this release does not verify their present availability.
 
@@ -53,3 +53,5 @@ See [discovery and language guide](docs/DISCOVERY.md). Customer interface text i
 ## Docker-host HTTPS deployment
 
 See [Docker host guide](deploy/README.md) for a private API behind a non-root HTTPS proxy, configuration/TLS placeholders, same-origin builds, operator provisioning and a disposable full-stack rehearsal. `scripts/build-web-deploy.sh` produces the Docker bundle and public build metadata. No production database, certificate or staff identity is created automatically.
+
+The [synthetic release guide](deploy/synthetic/README.md) supplies replaceable fictional institutions/staff/applicants, local TLS email capture, an inspectable loopback stack, operations reports and a locally signed Android rehearsal bundle. All generated credentials, data and keys are ignored. It documents exactly how to replace each input for a real release and which provider/device/human checks remain external.
