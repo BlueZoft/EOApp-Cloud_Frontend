@@ -64,6 +64,8 @@ Set `JAVA_HOME` to JDK 17, `ANDROID_HOME` to the Android SDK and activate Flutte
 python3 scripts/build-synthetic-android.py
 ```
 
+Add `--apk` to also produce an installable `synthetic-only.apk`. This requires build-tools 34.0.0 and verifies its signature and application ID. See [prototype handoff](../../docs/PROTOTYPE.md) for device networking and installation instructions. Device execution still needs a connected device/emulator.
+
 `FLUTTER_BIN=/absolute/path/to/flutter` is supported. The helper generates a 30-day self-signed key and `key.properties` only under ignored `deploy/.synthetic-android/`. It builds an AAB using `EOAPP_SIGNING_PROPERTIES` to select that file, checks the actual bundle manifest's synthetic application ID, verifies its signature and certificate subject, and writes `synthetic-only.aab` plus `report.json` with a SHA256. Existing operator `android/key.properties` is never replaced. Repeated runs reuse the local synthetic key. To choose a different synthetic identity, archive/remove only this generated directory first.
 
 This signed artifact is for packaging rehearsal, not public distribution. It does not add native trust for the local test CA, run on a device, satisfy current store target-SDK rules, or establish production signing. Actual Android releases should use the existing ignored operator signing file (or a secure `EOAPP_SIGNING_PROPERTIES` path) and approved API configuration. Never upload the synthetic key, identity or fictional privacy policy to a store. CI uploads only the synthetic AAB/report, never private signing material.

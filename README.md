@@ -1,5 +1,7 @@
 # Hetarata / Entrepreneur Outreach frontend — 1.3.1
 
+Start with the [prototype walkthrough and handoff](docs/PROTOTYPE.md) for the completed customer/staff flows, synthetic demonstration, generated evidence and Android prototype artifact.
+
 Flutter credit catalogue and inquiry form with a Sinhala/English/Tamil customer interface. Users search/filter the 15 retained schemes, compare two or three, inspect terms, and submit a scheme-specific or general inquiry to the Express API. Loan rates/text and branch names are unchanged; this release does not verify their present availability.
 
 ## Develop and build

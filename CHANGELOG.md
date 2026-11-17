@@ -1,5 +1,11 @@
 # Changelog
 
+## Prototype handoff — 2026-11-17
+
+- Added a complete demonstration walkthrough and a clear release handoff, including synthetic input replacement and generated evidence locations.
+- Added optional signed APK packaging with signature/application-ID verification alongside the existing AAB so a test-device installation artifact can be produced.
+- Rechecked the retained HTTPS prototype and final locale screenshot flow with a fresh synthetic deployment.
+
 ## 1.3.1+5 — 2026-11-16
 
 - Added a replaceable, explicitly synthetic release profile for fictional institutions, scoped staff, applicant data, example operating policies and native identity/listing fields.

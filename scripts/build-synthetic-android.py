@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build a locally signed SYNTHETIC AAB. Never uses/replaces production keys."""
 import hashlib
+import argparse
 import json
 import os
 from pathlib import Path
@@ -13,6 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--apk', action='store_true', help='Also build and verify an installable synthetic APK')
+    args = parser.parse_args()
     def java_tool(name):
         return str(Path(os.environ['JAVA_HOME'])/'bin'/name) if os.environ.get('JAVA_HOME') else name
     profile = json.loads((ROOT/'deploy/synthetic/profile.json').read_text())
@@ -59,8 +63,25 @@ def main():
         'artifact': target.name, 'sha256': hashlib.sha256(target.read_bytes()).hexdigest(),
         'signatureVerified': True, 'deviceTested': False, 'storePublished': False,
         'note': '30-day self-signed test key; not a production signing identity. No native trust override is added.'}
+    if args.apk:
+        sdk = Path(os.environ['ANDROID_HOME'])
+        tools = sdk/'build-tools/34.0.0'
+        if not (tools/'apksigner').is_file() or not (tools/'aapt').is_file():
+            raise SystemExit('APK verification requires Android SDK build-tools 34.0.0')
+        subprocess.run([flutter, 'build', 'apk', '--release', '--no-pub',
+            '--dart-define=API_BASE_URL=' + profile['native']['apiBaseUrl']], cwd=ROOT, env=environment, check=True)
+        apk = folder/'synthetic-only.apk'
+        shutil.copyfile(ROOT/'build/app/outputs/flutter-apk/app-release.apk', apk)
+        signature = subprocess.check_output([str(tools/'apksigner'), 'verify', '--print-certs', str(apk)], text=True)
+        if 'CN=SYNTHETIC ONLY' not in signature:
+            raise SystemExit('APK does not use the synthetic signing identity')
+        manifest = subprocess.check_output([str(tools/'aapt'), 'dump', 'badging', str(apk)], text=True)
+        if f"package: name='{identity}'" not in manifest:
+            raise SystemExit('APK application ID does not match the synthetic profile')
+        report['apk'] = {'artifact': apk.name, 'sha256': hashlib.sha256(apk.read_bytes()).hexdigest(),
+                         'signatureVerified': True, 'applicationIdVerified': True}
     (folder/'report.json').write_text(json.dumps(report, indent=2) + '\n')
-    print('PASS: synthetic signed Android bundle and signature verification. Artifact/report:', folder)
+    print('PASS: synthetic signed Android bundle' + (' and APK' if args.apk else '') + ' verification. Artifact/report:', folder)
 
 
 if __name__ == '__main__':
