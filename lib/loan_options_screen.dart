@@ -49,8 +49,11 @@ class _LoanOptionsScreenState extends State<LoanOptionsScreen> {
       ..sort();
     return AppPage(
         title: strings.t('schemes'),
-        child: Column(children: [
-          Padding(
+        child: LayoutBuilder(builder: (context, constraints) {
+          // Short screens and the on-screen keyboard need one scrolling flow.
+          // Taller views retain their fixed search and comparison controls.
+          final compact = constraints.maxHeight < 480;
+          final header = Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -95,54 +98,53 @@ class _LoanOptionsScreenState extends State<LoanOptionsScreen> {
                         child: Text('${strings.t('results')}: ${loans.length}',
                             semanticsLabel:
                                 '${strings.t('results')}: ${loans.length}')),
-                  ])),
-          Expanded(
-              child: loans.isEmpty
-                  ? Center(
-                      child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Text(strings.t('noResults'))))
-                  : ListView.builder(
-                      key: const ValueKey('loan-results'),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: loans.length,
-                      itemBuilder: (context, index) {
-                        final loan = loans[index];
-                        return Card(
-                            key: ValueKey('loan-${loan.id}'),
-                            child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      Text(loan.name,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleLarge),
-                                      const SizedBox(height: 8),
-                                      Text(loan.description),
-                                      CheckboxListTile(
-                                          key: ValueKey('compare-${loan.id}'),
-                                          contentPadding: EdgeInsets.zero,
-                                          title: Text(
-                                              '${strings.t('selectCompare')}: ${loan.name}'),
-                                          value: _selection.contains(loan.id),
-                                          onChanged: (value) =>
-                                              _toggle(loan, value ?? false)),
-                                      TextButton(
-                                          onPressed: () => Navigator.push(
-                                              context,
-                                              MaterialPageRoute<void>(
-                                                  builder: (_) =>
-                                                      LoanDetailsScreen(
-                                                          loan: loan,
-                                                          branches: widget
-                                                              .branches))),
-                                          child: Text(strings.t('details'))),
-                                    ])));
-                      })),
-          SafeArea(
+                  ]));
+          final results = loans.isEmpty
+              ? Center(
+                  child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(strings.t('noResults'))))
+              : ListView.builder(
+                  key: const ValueKey('loan-results'),
+                  shrinkWrap: compact,
+                  physics:
+                      compact ? const NeverScrollableScrollPhysics() : null,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: loans.length,
+                  itemBuilder: (context, index) {
+                    final loan = loans[index];
+                    return Card(
+                        key: ValueKey('loan-${loan.id}'),
+                        child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(loan.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge),
+                                  const SizedBox(height: 8),
+                                  Text(loan.description),
+                                  CheckboxListTile(
+                                      key: ValueKey('compare-${loan.id}'),
+                                      contentPadding: EdgeInsets.zero,
+                                      title: Text(
+                                          '${strings.t('selectCompare')}: ${loan.name}'),
+                                      value: _selection.contains(loan.id),
+                                      onChanged: (value) =>
+                                          _toggle(loan, value ?? false)),
+                                  TextButton(
+                                      onPressed: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute<void>(
+                                              builder: (_) => LoanDetailsScreen(
+                                                  loan: loan,
+                                                  branches: widget.branches))),
+                                      child: Text(strings.t('details'))),
+                                ])));
+                  });
+          final footer = SafeArea(
               top: false,
               child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -184,7 +186,10 @@ class _LoanOptionsScreenState extends State<LoanOptionsScreen> {
                               child: Text(
                                   '${strings.t('compare')} (${selected.length}/3)'))
                         ]),
-                      ]))),
-        ]));
+                      ])));
+          return compact
+              ? ListView(children: [header, results, footer])
+              : Column(children: [header, Expanded(child: results), footer]);
+        }));
   }
 }

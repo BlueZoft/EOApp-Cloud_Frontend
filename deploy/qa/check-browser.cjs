@@ -53,6 +53,14 @@ async function main() {
     await page.screenshot({ path: join(process.env.DEPLOY_REPORT_DIR, 'welcome-english-mobile.png') });
     await page.setViewportSize({ width: 1200, height: 1800 });
     await tap(page.getByRole('button', { name: 'Get started', exact: true }));
+    await tap(page.getByRole('button', { name: 'Search all schemes', exact: true }));
+    await page.setViewportSize({ width: 640, height: 320 });
+    await fill('Search by name, purpose or activity', 'SMELoC');
+    assert.ok(await page.getByRole('checkbox', { name: /^Select to compare: SMELoC/ }).count());
+    await page.screenshot({ path: join(process.env.DEPLOY_REPORT_DIR, 'search-landscape.png') });
+    await tap(page.getByRole('button', { name: 'Home', exact: true }));
+    await page.setViewportSize({ width: 1200, height: 1800 });
+    await tap(page.getByRole('button', { name: 'Get started', exact: true }));
     await tap(page.getByRole('button', { name: /My purpose is not listed/ }));
     async function fill(label, value) {
       const input = page.getByRole('textbox', { name: label, exact: true });
@@ -181,6 +189,7 @@ async function main() {
       synthetic: true, reference: receipt.inquiry.reference, publicSubmission: true, duplicateReplay: true,
       staffAccessIsolation: true, csrf: true, logout: true, secureCookies: true, csp: true,
       mobileWebLocales: ['si', 'ta', 'en'], bodyAndRateLimits: true,
+      landscapeSearch: true,
       emptyLogoutResponseCancellations: failed.filter(emptyLogoutCancellation).length,
     }, null, 2) + '\n');
     console.log('PASS: public HTTPS submission/replay, Secure staff cookies, CSRF-protected update, logout, CSP, oversized-body rejection and edge rate limits');

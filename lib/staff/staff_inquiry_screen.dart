@@ -62,8 +62,10 @@ class _StaffInquiryScreenState extends State<StaffInquiryScreen> {
       _error = error is StaffApiException
           ? error.message
           : 'Unable to load the inquiry. Try again.';
-      if (error is StaffApiException && error.code == 'UNAUTHENTICATED') {
+      if (error is StaffApiException &&
+          ['UNAUTHENTICATED', 'NOT_FOUND', 'FORBIDDEN'].contains(error.code)) {
         _inquiry = null;
+        _nextStatus = null;
       }
     });
   }
@@ -119,7 +121,8 @@ class _StaffInquiryScreenState extends State<StaffInquiryScreen> {
               icon: const Icon(Icons.refresh),
               label: const Text('Refresh inquiry')),
           if (inquiry != null) ...[
-            SelectableText('Reference: ${inquiry.reference}'),
+            SelectableText('Reference: ${inquiry.reference}',
+                semanticsLabel: 'Reference: ${inquiry.reference}'),
             DetailCard(label: 'Contact name', value: inquiry.name),
             DetailCard(label: 'Loan / scheme', value: inquiry.loan),
             DetailCard(label: 'Preferred branch', value: inquiry.branch),

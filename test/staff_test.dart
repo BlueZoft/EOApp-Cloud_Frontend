@@ -26,6 +26,111 @@ Map<String, Object?> inquiry({int version = 0, String status = 'new'}) => {
 http.Response response(Object body, [int status = 200]) =>
     http.Response(jsonEncode(body), status);
 void main() {
+  test('invalid login keeps its credential error even for non-JSON replies',
+      () async {
+    final api = StaffApi(
+        base: Uri.parse('https://test/api/v1/staff/'),
+        client: MockClient((_) async => http.Response('Unauthorized', 401)));
+    addTearDown(api.close);
+    await expectLater(
+        api.login('wrong@local.test', 'wrong-password'),
+        throwsA(isA<StaffApiException>()
+            .having((e) => e.code, 'code', 'INVALID_LOGIN')));
+  });
+  test('malformed staff success payloads produce a typed error', () async {
+    for (final entry in <String, Object>{
+      'session': {'staff': null, 'csrfToken': 'test-csrf'},
+      'institutions': {
+        'institutions': [null]
+      },
+      'inbox': {
+        'inquiries': [
+          {'reference': 42}
+        ]
+      },
+      'detail': {
+        'inquiry': {...inquiry(), 'version': 'wrong'}
+      },
+    }.entries) {
+      final api = StaffApi(
+          base: Uri.parse('https://test/api/v1/staff/'),
+          client: MockClient((_) async => response(entry.value)));
+      addTearDown(api.close);
+      final Future<Object?> result;
+      switch (entry.key) {
+        case 'session':
+          result = api.session();
+          break;
+        case 'institutions':
+          result = api.institutions();
+          break;
+        case 'inbox':
+          result = api.inbox();
+          break;
+        default:
+          result = api.detail(reference);
+      }
+      await expectLater(
+          result,
+          throwsA(isA<StaffApiException>()
+              .having((e) => e.code, 'code', 'INVALID_RESPONSE')),
+          reason: entry.key);
+    }
+  });
+  test('non-JSON unauthorized replies revoke client CSRF state', () async {
+    final seen = <http.Request>[];
+    final api = StaffApi(
+        base: Uri.parse('https://test/api/v1/staff/'),
+        client: MockClient((req) async {
+          seen.add(req);
+          if (req.url.path.endsWith('/login')) {
+            return response({
+              'staff': {'id': 'a', 'name': 'Officer', 'role': 'officer'},
+              'csrfToken': 'test-csrf'
+            });
+          }
+          return http.Response('<html>Session expired</html>', 401);
+        }));
+    addTearDown(api.close);
+    await api.login('a@local.test', 'test-password');
+    for (final call in [
+      () => api.logout(),
+      () => api.update(reference, 0, status: 'assigned')
+    ]) {
+      await expectLater(
+          call(),
+          throwsA(isA<StaffApiException>()
+              .having((e) => e.code, 'code', 'UNAUTHENTICATED')));
+    }
+    expect(seen.last.headers.containsKey('X-CSRF-Token'), false);
+  });
+  testWidgets(
+      'withdrawn inquiry access removes previously loaded contact details',
+      (tester) async {
+    var reads = 0;
+    final api = StaffApi(
+        base: Uri.parse('https://test/api/v1/staff/'),
+        client: MockClient((_) async => ++reads == 1
+            ? response({'inquiry': inquiry()})
+            : response({
+                'error': {'code': 'NOT_FOUND', 'message': 'Inquiry not found'}
+              }, 404)));
+    addTearDown(api.close);
+    await tester.pumpWidget(MaterialApp(
+        home: StaffInquiryScreen(
+            reference: reference,
+            api: api,
+            session:
+                const StaffSession(id: 'a', name: 'Officer', role: 'officer'),
+            institutions: const [])));
+    await tester.pumpAndSettle();
+    expect(find.text('0771234567'), findsOneWidget);
+    await tester.tap(find.text('Refresh inquiry'));
+    await tester.pumpAndSettle();
+    expect(find.text('0771234567'), findsNothing);
+    expect(find.text('Synthetic Person'), findsNothing);
+    expect(find.text('Inquiry not found'), findsOneWidget);
+  });
   test(
       'staff mutations include CSRF and expected version; conflicts remain visible',
       () async {

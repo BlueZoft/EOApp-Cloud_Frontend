@@ -45,6 +45,10 @@ class _StaffPortalScreenState extends State<StaffPortalScreen> {
         _session = null;
         _inquiries = [];
         _institutions = [];
+        _cursor = null;
+        _status = '';
+        _institution = '';
+        _reference.clear();
       }
       _error = error is StaffApiException
           ? error.message
@@ -54,7 +58,9 @@ class _StaffPortalScreenState extends State<StaffPortalScreen> {
 
   Future<void> _restore() async {
     try {
-      _session = await _api.session();
+      final session = await _api.session();
+      if (!mounted) return;
+      _session = session;
       await _load();
     } on StaffApiException catch (error) {
       if (error.code != 'UNAUTHENTICATED') _failure(error);
@@ -123,7 +129,7 @@ class _StaffPortalScreenState extends State<StaffPortalScreen> {
   }
 
   Future<void> _load({bool more = false}) async {
-    if (_session == null) return;
+    if (!mounted || _session == null) return;
     if (mounted) {
       setState(() {
         _busy = true;

@@ -19,6 +19,9 @@ class SyntheticBoundaryTests(unittest.TestCase):
         wrong = copy.deepcopy(original)
         wrong['directory']['rules'][0]['institutionCode'] = 'missing'
         variants.append(wrong)
+        boolean_days = copy.deepcopy(original)
+        boolean_days['operations']['retentionDays'] = True
+        variants.append(boolean_days)
         for profile in variants:
             with self.subTest(profile=profile['directory']['rules'][0]['institutionCode']), tempfile.TemporaryDirectory() as directory:
                 path = Path(directory)/'profile.json'

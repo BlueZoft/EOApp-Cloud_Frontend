@@ -76,6 +76,20 @@ Widget localized(Widget home, {ValueNotifier<Locale>? language}) {
 }
 
 void main() {
+  testWidgets('scheme search fits a short landscape viewport', (tester) async {
+    tester.view.physicalSize = const Size(640, 320);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+        localized(const LoanOptionsScreen(loans: loans, branches: [])));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.enterText(find.byKey(const ValueKey('loan-search')), 'Gamma');
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.ensureVisible(find.byKey(const ValueKey('compare-loan-03')));
+  });
   test(
       'search combines words across fields, ignores case/whitespace and keeps category boundaries',
       () {

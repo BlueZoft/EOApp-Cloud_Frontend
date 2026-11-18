@@ -1,4 +1,4 @@
-# Prototype handoff — frontend 1.3.1 / backend 1.2.1
+# Prototype handoff — frontend 1.3.2 / backend 1.2.2
 
 The prototype implements credit-scheme discovery, comparison, guided inquiry preparation, inquiry receipt and institutional follow-up. It can be demonstrated with replaceable synthetic data on the local HTTPS stack. The original catalogue remains unchanged; current availability and financial eligibility are not verified.
 
@@ -38,7 +38,9 @@ The completed runner writes `browser-report.json`, `operations-report.json`, a p
 
 The browser report covers submission/replay, all three staff roles, isolation, CSRF, logout, cookies, CSP, API no-store and edge limits. The operations report covers authenticated STARTTLS capture, the routed recipient, backup/restore with the unique index, a retention dry-run/delete limited to one marked synthetic probe, a real API outage/recovery, certificate expiry warning and nginx reload. Example policy values do not install recurring production jobs or external alerts.
 
-Previously completed application checks: 28 backend tests and 17 Flutter tests passed, the analyzer was clean, and release web and signed Android bundle builds passed. The final browser run also checks the mobile locale screenshots after the language menu closes. See the current generated reports for this instance's results; hosted GitHub Actions results remain separate.
+Current application checks: 32 backend tests and 22 Flutter tests passed, the analyzer was clean, and release web and signed Android builds passed. The browser rehearsal checks mobile locale screenshots after the language menu closes and landscape search in a short viewport. See the current generated reports for this instance's results; hosted GitHub Actions results remain separate.
+
+Revalidated on 2026-11-18 for frontend 1.3.2/backend 1.2.2: the refreshed containers passed the complete HTTPS/browser/operations rehearsal, including landscape search, routed TLS mail, scoped staff access and backup/restore. Generated reports and images are under `deploy/.synthetic/`; signed native artifacts are under `deploy/.synthetic-android/`.
 
 ## Android prototype artifact
 
@@ -52,7 +54,7 @@ This produces a signed AAB and an installable `deploy/.synthetic-android/synthet
 
 The profile's native API origin is a replaceable loopback placeholder. A physical device needs a reachable HTTPS backend with a certificate trusted by that device; localhost on a phone refers to the phone itself. Change `native.apiBaseUrl` and rebuild for that setup. Packaging verification does not establish native runtime behavior, and the helper does not weaken native TLS trust.
 
-Validation on 2026-11-17: the refreshed full HTTPS/browser/operations rehearsal passed, including the closed-menu locale captures. The AAB and APK built and passed signing/identity checks. The retained Android toolchain emitted Kotlin metadata compatibility diagnostics during APK packaging despite a successful build; retain this as a native toolchain/device review item before distribution. The existing SDK 34 compatibility setup does not establish current store eligibility.
+Validation on 2026-11-17: the refreshed full HTTPS/browser/operations rehearsal passed, including the closed-menu locale captures. The AAB and APK built and passed signing/identity checks. In 1.3.2, Kotlin 1.8.22 paired with Android Gradle Plugin 7.4.2 resolves the Kotlin metadata compatibility diagnostics observed in that earlier build. The SDK 34 compatibility setup does not establish current store eligibility; device execution and current store requirements still need review before distribution.
 
 ## Prototype completion versus release handoff
 

@@ -1,7 +1,7 @@
 name: flutter_frontend
 description: Entrepreneur outreach loan catalogue and inquiries.
 publish_to: 'none'
-version: 1.3.1+5
+version: 1.3.2+6
 environment:
   sdk: '>=3.5.0 <4.0.0'
 dependencies:

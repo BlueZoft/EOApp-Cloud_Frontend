@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.2+6 — 2026-11-18
+
+- Normalized malformed staff response models into typed API errors, including null institution entries. HTTP 401 clears CSRF state even for non-JSON replies while preserving a useful invalid-login error.
+- Removed previously loaded contact details when a refreshed inquiry becomes inaccessible. Session expiry clears stale inbox filters; a completed session restore no longer starts work after the portal is disposed.
+- Fixed scheme-search overflow in short landscape/keyboard viewports by using one scrolling flow there while retaining fixed search/comparison controls in taller views.
+- Upgraded the compatible Android toolchain pair to Kotlin 1.8.22 / Android Gradle Plugin 7.4.2, resolving the prior Kotlin metadata compatibility errors in release packaging.
+- Rejected boolean synthetic retention-day settings before they could become invalid database scripts. Extended the HTTPS browser rehearsal with landscape search coverage.
+
+Validation: 22 Flutter tests passed, analyzer clean, release web build passed, and synthetic signed AAB/APK builds and identity/signature verification passed without the previous Kotlin metadata diagnostics. The matching backend 1.2.2 passed all 32 tests, including credential-reset/session races, legacy revision compatibility, stale delivery claims and combined filters. Dependency audits found no known vulnerabilities. Device execution and real provider/store release checks remain external.
+
 ## Prototype handoff — 2026-11-17
 
 - Added a complete demonstration walkthrough and a clear release handoff, including synthetic input replacement and generated evidence locations.

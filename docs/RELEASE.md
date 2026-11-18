@@ -26,7 +26,7 @@ Deploy the entire `build/web` directory. An omitted API base URL requires an HTT
 
 ## Android
 
-Use JDK 17 with the current Gradle 7.6.3 / Android Gradle Plugin 7.3.0 project, Android SDK platform 34 and build-tools 30.0.3/34.0.0, and Flutter 3.24.5. Do not use JDK 21 with this Gradle version. `JAVA_HOME` must point to your JDK 17 installation; `ANDROID_HOME` must point to the SDK. Retain package checksums, trusted CA configuration and TLS verification when installing tools.
+Use JDK 17 with Gradle 7.6.3, Android Gradle Plugin 7.4.2 and Kotlin 1.8.22, Android SDK platform 34 and build-tools 30.0.3/34.0.0, and Flutter 3.24.5. This plugin pairing resolves the earlier Kotlin metadata compatibility diagnostics. Do not use JDK 21 with this Gradle version. `JAVA_HOME` must point to your JDK 17 installation; `ANDROID_HOME` must point to the SDK. Retain package checksums, trusted CA configuration and TLS verification when installing tools.
 
 Development builds use the existing development ID and Android debug signing:
 
@@ -69,6 +69,8 @@ Configure same-origin/same-site HTTPS hosting for the browser-managed staff cook
 No new API setting, credential or data migration is required. Review the new Sinhala/English/Tamil interface text with fluent speakers, check mixed-script font rendering and confirm search/comparison on the target devices. Original Sinhala scheme/branch descriptions remain unchanged; approved translations and verified eligibility metadata are still required for those future extensions. See [discovery guide](DISCOVERY.md).
 
 ## Docker host preparation
+
+For backend 1.2.2, recreate all API/notification-worker instances together so every worker enforces delivery claim ownership. Existing account/session records remain compatible with revision zero until the next operator reset/disable. The upgrade adds no destructive data migration. Match it with frontend 1.3.2 for the staff/privacy and responsive-layout fixes.
 
 The [Docker-host guide](../deploy/README.md) provides the selected same-origin HTTPS target, a Compose stack, ignored `.env.deploy`/TLS locations and an optional isolated deployment rehearsal. Real credentials/certificates remain host configuration; the normal stack does not create a production database. Keep its API private when using the explicit one-hop proxy trust setting.
 

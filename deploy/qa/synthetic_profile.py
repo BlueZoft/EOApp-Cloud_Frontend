@@ -28,6 +28,6 @@ def load_profile(path):
         raise ValueError('The browser rehearsal currently exercises a general, female applicant')
     if not any(rule == {'loanId': 'general', 'branchId': '*', 'institutionCode': officers[0]['institution']} for rule in directory['rules']):
         raise ValueError('Route general inquiries to the first synthetic officer institution')
-    if not isinstance(profile['operations']['retentionDays'], int) or not 1 <= profile['operations']['retentionDays'] <= 365:
+    if type(profile['operations']['retentionDays']) is not int or not 1 <= profile['operations']['retentionDays'] <= 365:
         raise ValueError('Synthetic retentionDays must be 1–365')
     return profile
